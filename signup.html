@@ -1,0 +1,221 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signup</title>
+
+<!-- ✅ FIREBASE SCRIPTS -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+:root {
+  --bg-color: #f4f4f6;
+  --primary-blue: #20456d;
+  --vote-red: #e63946;
+  --teal-accent: #45beaa;
+  --white: #ffffff;
+  --text-dark: #333;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--white);
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+h2 {
+  color: var(--primary-blue);
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  font-size: 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: white;
+}
+
+.google-btn {
+  background: #db4437;
+  color: white;
+}
+
+.linkedin-btn {
+  background: #0077b5;
+  color: white;
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background: #ddd;
+}
+
+.link-group {
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.link-group a {
+  color: var(--teal-accent);
+  text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-card">
+  <h2>Create Account</h2>
+
+  <form id="signupForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+    <button type="submit" class="btn-primary">Signup</button>
+  </form>
+
+  <hr style="margin:20px 0;">
+
+  <button class="google-btn" onclick="googleSignup()">Continue with Google</button>
+  <button class="linkedin-btn" onclick="linkedinSignup()">Continue with LinkedIn</button>
+
+  <div class="link-group">
+    <a href="login.html">Already have an account? Login</a>
+  </div>
+</div>
+
+<script>
+  // =========================
+  // Firebase Config
+  // =========================
+  const firebaseConfig = {
+    apiKey: "AIzaSyAk0C_RHJo3gBGX1ugrHUDQpnjKe9-MoYQ",
+    authDomain: "voting-backend-f866d.firebaseapp.com",
+    projectId: "voting-backend-f866d",
+    storageBucket: "voting-backend-f866d.firebasestorage.app",
+    messagingSenderId: "157466878467",
+    appId: "1:157466878467:web:8373784bcf5fc5341a2436"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // =========================
+  // Email/Password Signup
+  // =========================
+  document.getElementById("signupForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => userCredential.user.updateProfile({ displayName: name }))
+      .then(() => {
+        alert("Signup successful!");
+        window.location.href = "home.html";
+      })
+      .catch(error => alert(error.message));
+  });
+
+  // =========================
+  // Google Signup
+  // =========================
+  function googleSignup() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then(() => {
+        alert("Google signup successful!");
+        window.location.href = "home.html";
+      })
+      .catch(error => alert(error.message));
+  }
+
+  // =========================
+  // LinkedIn Signup
+  // =========================
+  function linkedinSignup() {
+    const width = 600, height = 600;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+
+    // ✅ Open backend route, not LinkedIn URL directly
+    const popup = window.open(
+      "http://localhost:5000/auth/linkedin",
+      "LinkedIn Login",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    // Listen for Firebase custom token from backend
+    function receiveToken(event) {
+      if (!event.data?.firebaseToken) return;
+
+      auth.signInWithCustomToken(event.data.firebaseToken)
+        .then(() => {
+          alert("LinkedIn signup successful!");
+          window.location.href = "home.html";
+        })
+        .catch(error => alert("Firebase login failed: " + error.message));
+
+      window.removeEventListener("message", receiveToken);
+    }
+
+    window.addEventListener("message", receiveToken);
+  }
+</script>
+
+</body>
+</html>

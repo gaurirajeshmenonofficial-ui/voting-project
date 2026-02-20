@@ -1,0 +1,202 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voters List</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+:root {
+  --bg-color: #f4f4f6;
+  --primary-blue: #20456d;
+  --teal-accent: #45beaa;
+  --white: #ffffff;
+  --text-dark: #333;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  padding: 20px;
+}
+
+.navbar {
+  background-color: var(--primary-blue);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.navbar button {
+  background: var(--teal-accent);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.navbar button:hover {
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--primary-blue);
+}
+
+.list-box {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  min-height: 100px;
+}
+
+.voter-row {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.voter-row:hover {
+  background-color: #f0f0f0;
+}
+
+.voter-row:last-child {
+  border-bottom: none;
+}
+
+.voter-name {
+  font-weight: 600;
+  color: var(--primary-blue);
+}
+
+.voter-info {
+  font-size: 0.9rem;
+  color: var(--teal-accent);
+}
+
+@media (max-width: 480px) {
+  .voter-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <button id="logoutBtn">Logout</button>
+</div>
+
+<div class="container">
+  <h1>Voter Participation List</h1>
+  <div class="list-box" id="voterList">
+    Loading voters...
+  </div>
+</div>
+
+<script>
+  // =========================
+  // Firebase Config
+  // =========================
+  const firebaseConfig = {
+    apiKey: "AIzaSyAk0C_RHJo3gBGX1ugrHUDQpnjKe9-MoYQ",
+    authDomain: "voting-backend-f866d.firebaseapp.com",
+    projectId: "voting-backend-f866d",
+    storageBucket: "voting-backend-f866d.firebasestorage.app",
+    messagingSenderId: "157466878467",
+    appId: "1:157466878467:web:8373784bcf5fc5341a2436"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // =========================
+  // Logout Functionality
+  // =========================
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    auth.signOut().then(() => {
+      alert("You have been logged out!");
+      window.location.href = "login.html";
+    });
+  });
+
+  // =========================
+  // Fetch Voters List
+  // =========================
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      // Redirect to login if not logged in
+      window.location.href = "login.html";
+      return;
+    }
+
+    // Get Firebase ID token for backend auth
+    user.getIdToken().then(idToken => {
+      fetch("http://localhost:5000/api/voters", {
+        headers: {
+          "Authorization": "Bearer " + idToken
+        }
+      })
+      .then(res => res.json())
+      .then(voters => {
+        const list = document.getElementById("voterList");
+        list.innerHTML = "";
+
+        if (!voters || voters.length === 0) {
+          list.innerHTML = "<p style='padding:15px;'>No voters yet.</p>";
+          return;
+        }
+
+        voters.forEach(voter => {
+          const row = document.createElement("div");
+          row.className = "voter-row";
+
+          // Only display name, LinkedIn profile, and voted time
+          row.innerHTML = `
+            <span class="voter-name">${voter.name}</span>
+            <span class="voter-info">
+              ${voter.linkedInProfile ? `<a href="${voter.linkedInProfile}" target="_blank">LinkedIn</a> | ` : ""}
+              ${voter.votedAt ? new Date(voter.votedAt).toLocaleString() : ""}
+            </span>
+          `;
+          list.appendChild(row);
+        });
+      })
+      .catch(err => {
+        document.getElementById("voterList").innerHTML = "<p style='padding:15px;color:red;'>Failed to load voters.</p>";
+        console.error(err);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
