@@ -1,0 +1,231 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voting App - Login</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+:root {
+  --bg-color: #f4f4f6;
+  --primary-blue: #20456d;
+  --vote-red: #e63946;
+  --teal-accent: #45beaa;
+  --white: #ffffff;
+  --text-dark: #333;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--white);
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  color: var(--primary-blue);
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: var(--teal-accent);
+  box-shadow: 0 0 5px rgba(69, 190, 170, 0.3);
+}
+
+button {
+  background-color: var(--primary-blue);
+  color: white;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.google-btn {
+  background: #db4437;
+  color: white;
+}
+
+.linkedin-btn {
+  background: #0077b5;
+  color: white;
+}
+
+.link-group {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.link-group a {
+  color: var(--teal-accent);
+  text-decoration: none;
+}
+
+.link-group a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 30px 20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-card">
+  <h2>Login</h2>
+
+  <!-- Email/Password Login -->
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
+
+  <!-- OAuth Logins -->
+  <button class="google-btn" onclick="googleLogin()">Login with Google</button>
+  <button class="linkedin-btn" onclick="linkedinLogin()">Login with LinkedIn</button>
+
+  <div class="link-group">
+    <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+    <p><a href="forgotPassword.html">Forgot Password?</a></p>
+  </div>
+</div>
+
+<script>
+  // =========================
+  // Firebase Config
+  // =========================
+  const firebaseConfig = {
+    apiKey: "AIzaSyAk0C_RHJo3gBGX1ugrHUDQpnjKe9-MoYQ",
+    authDomain: "voting-backend-f866d.firebaseapp.com",
+    projectId: "voting-backend-f866d",
+    storageBucket: "voting-backend-f866d.firebasestorage.app",
+    messagingSenderId: "157466878467",
+    appId: "1:157466878467:web:8373784bcf5fc5341a2436"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // =========================
+  // Email/Password Login
+  // =========================
+  document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        alert("Login successful!");
+        window.location.href = "home.html"; // redirect after login
+      })
+      .catch(err => alert("Login failed: " + err.message));
+  });
+
+  // =========================
+  // Google Login
+  // =========================
+  function googleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then(() => {
+        alert("Login successful!");
+        window.location.href = "home.html";
+      })
+      .catch(err => alert("Login failed: " + err.message));
+  }
+
+  // =========================
+  // LinkedIn Login
+  // =========================
+  function linkedinLogin() {
+    const width = 600, height = 600;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+
+    const linkedinWindow = window.open(
+      "http://localhost:5000/auth/linkedin/callback",
+      "LinkedIn Login",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    function receiveToken(event) {
+      if (!event.data?.firebaseToken) return;
+
+      auth.signInWithCustomToken(event.data.firebaseToken)
+        .then(() => {
+          alert("Login successful!");
+          window.location.href = "home.html";
+        })
+        .catch(err => alert("Firebase login failed: " + err.message));
+
+      window.removeEventListener("message", receiveToken);
+    }
+
+    window.addEventListener("message", receiveToken);
+  }
+</script>
+
+</body>
+</html>

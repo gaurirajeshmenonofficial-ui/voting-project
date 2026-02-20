@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vote Confirmation</title>
+<style>
+  body {
+    background-color: #f4f4f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .confirmation-card {
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 400px;
+  }
+  h2 {
+    color: #20456d;
+    margin-bottom: 20px;
+  }
+  p {
+    color: #45beaa;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  a {
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #20456d;
+    padding: 10px 20px;
+    border-radius: 6px;
+  }
+  a:hover {
+    opacity: 0.9;
+  }
+</style>
+</head>
+<body>
+
+<div class="confirmation-card">
+  <h2>Vote Submitted!</h2>
+  <p id="candidateName"></p>
+  <a href="home.html">Back to Home</a>
+</div>
+
+<script>
+  const candidate = localStorage.getItem("votedCandidate") || "";
+  const candidateElem = document.getElementById("candidateName");
+  candidateElem.textContent = candidate ? `You voted for ${candidate}.` : '';
+  // Optional: clear storage if you want
+  // localStorage.removeItem("votedCandidate");
+</script>
+
+</body>
+</html>

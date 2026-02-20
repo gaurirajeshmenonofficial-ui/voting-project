@@ -1,0 +1,226 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Active Candidates</title>
+
+<!-- ✅ FIREBASE SCRIPTS -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+:root {
+  --bg-color: #f4f4f6;
+  --primary-blue: #20456d;
+  --vote-red: #e63946;
+  --teal-accent: #45beaa;
+  --white: #ffffff;
+  --text-dark: #333;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--primary-blue);
+  padding: 15px 40px;
+  display: flex;
+  gap: 30px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: var(--primary-blue);
+}
+
+.candidate-wrapper {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Candidate Card */
+.candidate-card {
+  background: var(--white);
+  padding: 25px;
+  width: 100%;
+  max-width: 300px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.candidate-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.candidate-card h3 {
+  color: var(--primary-blue);
+  margin-bottom: 10px;
+}
+
+.candidate-card p {
+  margin-bottom: 15px;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+}
+
+.candidate-card a {
+  color: var(--teal-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.candidate-card a:hover {
+  text-decoration: underline;
+}
+
+/* Vote Button */
+.vote-btn {
+  background-color: var(--vote-red);
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  width: 100%;
+  font-weight: 600;
+  transition: 0.3s ease, transform 0.2s ease;
+}
+
+.vote-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .candidate-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+  <a href="home.html">Home</a>
+  <a href="voters.html">Voters</a>
+  <a href="#" id="logoutBtn">Logout</a>
+</nav>
+
+<div class="container">
+  <h1>Active Candidates</h1>
+
+  <div class="candidate-wrapper">
+
+    <div class="candidate-card">
+      <h3>Alice Johnson</h3>
+      <p>Leading with integrity and a vision for technological advancement.</p>
+      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+        View LinkedIn
+      </a>
+      <button class="vote-btn" onclick="vote('Alice Johnson')">
+        Vote
+      </button>
+    </div>
+
+    <div class="candidate-card">
+      <h3>Robert Smith</h3>
+      <p>Dedicated to sustainable growth and community empowerment.</p>
+      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+        View LinkedIn
+      </a>
+      <button class="vote-btn" onclick="vote('Robert Smith')">
+        Vote
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // =========================
+  // Firebase Config
+  // =========================
+  const firebaseConfig = {
+    apiKey: "AIzaSyAk0C_RHJo3gBGX1ugrHUDQpnjKe9-MoYQ",
+    authDomain: "voting-backend-f866d.firebaseapp.com",
+    projectId: "voting-backend-f866d",
+    storageBucket: "voting-backend-f866d.firebasestorage.app",
+    messagingSenderId: "157466878467",
+    appId: "1:157466878467:web:8373784bcf5fc5341a2436"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // =========================
+  // Auto-redirect if not logged in
+  // =========================
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+
+  // =========================
+  // Logout
+  // =========================
+  const logoutBtn = document.getElementById("logoutBtn");
+  logoutBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+    auth.signOut()
+      .then(() => {
+        window.location.href = "login.html";
+      })
+      .catch(err => {
+        alert("Logout failed: " + err.message);
+      });
+  });
+
+  // =========================
+  // Voting function
+  // =========================
+  function vote(candidate) {
+    localStorage.setItem("votedCandidate", candidate);
+    window.location.href = "Confirmation.html";
+  }
+</script>
+
+</body>
+</html>
